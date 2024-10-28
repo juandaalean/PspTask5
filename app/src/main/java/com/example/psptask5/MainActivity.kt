@@ -23,34 +23,49 @@ import org.json.JSONObject
 class MainActivity : AppCompatActivity() {
 
     private val job = Job() // Job principal para cancelar todas las corrutinas
+
     private lateinit var tvCatFact: TextView
-    private lateinit var ivDog: ImageView
+    private lateinit var tvJoke: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        tvCatFact = findViewById(R.id.txCatFact)
-        ivDog = findViewById(R.id.ivDog)
+        tvCatFact = findViewById(R.id.tvCatFact)
+        tvJoke = findViewById(R.id.tvJoke)
+
 
         // Lanzar las corrutinas en el alcance del job principal
         GlobalScope.launch(Dispatchers.Main + job) {
 
             try {
                 val catFact = getCatFact()
+                val joke = getJoke()
                 withContext(Main) {
                     tvCatFact.text = catFact
+                    tvJoke.text = joke
                 }
             } catch (e: Exception) {
                 // Manejar errores
                 Log.e("MainActivity", "Error al obtener el hecho sobre gatos", e)
                 tvCatFact.text = "No se pudo obtener el hecho sobre gatos"
+                tvJoke.text = "No se pudo obtener un chiste"
+
             }
         }
+
+
+
     }
 
     private suspend fun getCatFact(): String {
         val response = Fuel.get("https://catfact.ninja/fact").awaitString()
+        return response
+    }
+
+    private suspend fun getJoke(): String {
+        // Ajustar la URL según los parámetros de la API
+        val response = Fuel.get("https://dog.ceo/api/breeds/image/random").awaitString()
         return response
     }
 
